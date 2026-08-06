@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Pre Test & Post Test Pelatihan Gudang</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#16323d;
+    --ink-soft:#3d5964;
+    --paper:#eef1f0;
+    --panel:#ffffff;
+    --line:#d6dedb;
+    --teal:#173b4a;
+    --teal-dark:#0e2732;
+    --amber:#dc9a2e;
+    --amber-soft:#fbeed4;
+    --green:#2f8f5b;
+    --green-soft:#e3f3e9;
+    --red:#bd4437;
+    --red-soft:#fbe6e3;
+    --mono: 'JetBrains Mono', monospace;
+    --disp: 'Oswald', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--body);
+    background:
+      repeating-linear-gradient(135deg, rgba(23,59,74,0.035) 0 10px, transparent 10px 20px),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .app{ width:100%; max-width:640px; }
+
+  /* Header / batch strip */
+  .strip{
+    background:var(--teal);
+    color:#fff;
+    border-radius:10px 10px 0 0;
+    padding:14px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.06em;
+  }
+  .strip b{ color:#f4d99a; }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 10px 10px;
+    padding:32px 28px 28px;
+    box-shadow:0 1px 3px rgba(23,59,74,.06);
+  }
+
+  h1.title{
+    font-family:var(--disp);
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:.01em;
+    color:var(--teal-dark);
+    margin:4px 0 4px;
+  }
+  .subtitle{ color:var(--ink-soft); font-size:14px; margin-bottom:22px; line-height:1.5;}
+
+  label{ display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin:16px 0 6px;}
+  input[type=text]{
+    width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:7px;
+    font-size:15px; font-family:var(--body); background:#fbfcfc; color:var(--ink);
+  }
+  input[type=text]:focus{ outline:none; border-color:var(--teal); background:#fff;}
+
+  .btn{
+    font-family:var(--body); font-weight:700; font-size:14px; letter-spacing:.02em;
+    border:none; border-radius:7px; padding:13px 22px; cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+  .btn:active{ transform:scale(.98); }
+  .btn-primary{ background:var(--teal); color:#fff; width:100%; margin-top:24px;}
+  .btn-primary:hover{ background:var(--teal-dark); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; color:var(--teal); border:1.5px solid var(--line); width:100%; margin-top:10px;}
+  .btn-ghost:hover{ border-color:var(--teal); }
+  .btn-link{ background:none; color:var(--ink-soft); text-decoration:underline; padding:8px; font-weight:600; font-size:13px;}
+  .link-row{ display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:2px; }
+  .link-row .btn-link{ text-decoration:none; }
+  .link-row .btn-link:not(:last-child)::after{ content:"·"; margin-left:6px; color:var(--line); text-decoration:none; }
+  .btn-export{
+    background:var(--amber-soft); color:#8a5f14; border:1.5px solid var(--amber);
+    width:100%; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-export:hover{ background:#f6e3bb; }
+  .btn-export svg{ width:15px; height:15px; }
+
+  /* jenis test toggle */
+  .toggle-group{ display:flex; gap:8px; margin-top:6px; }
+  .toggle-opt{
+    flex:1; text-align:center; padding:12px 8px; border:1.5px solid var(--line); border-radius:8px;
+    cursor:pointer; font-weight:700; font-size:13.5px; color:var(--ink-soft); transition:all .12s;
+  }
+  .toggle-opt.active{ border-color:var(--teal); background:var(--teal); color:#fff; }
+  .toggle-opt .tag{ display:block; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.06em; margin-top:2px; opacity:.75; text-transform:uppercase; }
+
+  .filter-tabs{ display:flex; gap:6px; margin-bottom:4px; }
+  .filter-tab{
+    padding:6px 12px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
+    font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer;
+  }
+  .filter-tab.active{ background:var(--teal); border-color:var(--teal); color:#fff; }
+
+  .improve-box{
+    border:1.5px dashed var(--amber); background:var(--amber-soft); border-radius:8px;
+    padding:12px 14px; margin:14px 0 4px; font-size:12.5px;
+  }
+  .improve-title{ font-family:var(--disp); font-weight:700; font-size:12.5px; letter-spacing:.04em; text-transform:uppercase; color:#8a5f14; margin-bottom:8px;}
+  .improve-row{ display:flex; justify-content:space-between; padding:4px 0; }
+  .improve-name{ color:var(--ink); font-weight:600; }
+  .delta{ font-family:var(--mono); font-weight:700; }
+  .delta.up{ color:var(--green); }
+  .delta.down{ color:var(--red); }
+  .delta.flat{ color:var(--ink-soft); }
+
+  /* progress */
+  .progress-row{ display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .progress-track{ flex:1; height:7px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--amber); border-radius:4px; transition:width .3s ease; }
+  .progress-num{ font-family:var(--mono); font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+
+  .q-text{ font-size:17px; font-weight:600; line-height:1.5; color:var(--teal-dark); margin-bottom:18px; }
+
+  .opt{
+    display:flex; align-items:flex-start; gap:12px;
+    border:1.5px solid var(--line); border-radius:8px; padding:13px 14px; margin-bottom:10px;
+    cursor:pointer; transition:border-color .12s, background .12s;
+  }
+  .opt:hover{ border-color:#9fb4bb; background:#f8fafa;}
+  .opt.selected{ border-color:var(--teal); background:#eef4f5; }
+  .opt input{ margin-top:2px; accent-color:var(--teal); }
+  .opt-letter{ font-family:var(--mono); font-weight:700; color:var(--teal); }
+  .opt-text{ font-size:14.5px; line-height:1.45; color:var(--ink); }
+
+  .nav-row{ display:flex; gap:10px; margin-top:6px; }
+  .nav-row .btn{ margin-top:14px; }
+  .btn-secondary{ background:#fff; border:1.5px solid var(--line); color:var(--ink-soft); flex:0 0 110px;}
+
+  /* result stamp */
+  .result-wrap{ text-align:center; padding:6px 0 4px; }
+  .stamp{
+    display:inline-block;
+    font-family:var(--disp);
+    font-weight:700;
+    font-size:28px;
+    letter-spacing:.04em;
+    padding:14px 26px;
+    border:5px solid currentColor;
+    border-radius:10px;
+    transform:rotate(-6deg);
+    margin:10px 0 22px;
+  }
+  .stamp.pass{ color:var(--green); background:var(--green-soft); }
+  .stamp.fail{ color:var(--red); background:var(--red-soft); }
+
+  .score-big{ font-family:var(--mono); font-size:15px; color:var(--ink-soft); margin-bottom:4px;}
+  .score-big b{ font-size:22px; color:var(--teal-dark); }
+
+  .who-line{ font-size:14px; color:var(--ink-soft); margin-bottom:2px; }
+  .who-line b{ color:var(--ink); }
+
+  .review{ margin-top:26px; text-align:left; border-top:1px solid var(--line); padding-top:18px; }
+  .review-title{ font-family:var(--disp); font-size:14px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:12px;}
+  .review-item{ display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; }
+  .review-item:last-child{ border-bottom:none; }
+  .mark{ flex:0 0 20px; font-weight:800; }
+  .mark.ok{ color:var(--green); }
+  .mark.bad{ color:var(--red); }
+  .review-body{ flex:1; }
+  .review-q{ color:var(--ink); margin-bottom:2px; }
+  .review-ans{ color:var(--ink-soft); font-size:12.5px; }
+
+  /* recap table */
+  .recap-table{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+  .recap-table th{
+    background:var(--teal); color:#fff; text-align:left; padding:9px 10px; font-family:var(--mono);
+    font-weight:600; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+  }
+  .recap-table td{ padding:9px 10px; border-bottom:1px solid var(--line); }
+  .recap-table tr:nth-child(even) td{ background:#f7f9f9; }
+  .badge{ font-family:var(--mono); font-weight:700; padding:2px 8px; border-radius:20px; font-size:11.5px; }
+  .badge.pass{ color:var(--green); background:var(--green-soft); }
+  .badge.fail{ color:var(--red); background:var(--red-soft); }
+  .empty-recap{ text-align:center; color:var(--ink-soft); font-size:13.5px; padding:20px 0; }
+
+  .loading{ text-align:center; color:var(--ink-soft); font-size:13px; padding:20px 0; font-family:var(--mono);}
+  .footnote{ text-align:center; font-size:11.5px; color:#93a4aa; margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="strip">
+    <span>PT. CAKRAWALA SEMESTA ESTETIKA</span>
+    <b id="stripRight">POST&nbsp;TEST&nbsp;GUDANG</b>
+  </div>
+  <div class="card" id="card"></div>
+  <div class="footnote">Sistem penilaian Pre Test &amp; Post Test — Pelatihan Gudang Bahan Baku, Bahan Kemas &amp; Produk Jadi</div>
+</div>
+
+<script>
+const KKM = 70; // passing score %
+
+const QUESTIONS = [
+{q:"Apa fungsi utama gudang menurut materi pelatihan?",opts:["Tempat parkir kendaraan operasional perusahaan","Area penyimpanan bahan baku, bahan kemas, atau produk jadi dari mulai diterima sampai digunakan/didistribusikan, dengan kondisi lingkungan terjaga","Ruang kerja khusus staff Procurement","Tempat pelatihan karyawan baru"],a:1},
+{q:"Peraturan BPOM yang menjadi dasar regulasi Pedoman CPKB terkait sanitasi & higiene gudang adalah...",opts:["PerBPOM No. 31/2020","PerBPOM No. 12/2019","PerBPOM No. 5/2021","PerBPOM No. 18/2022"],a:0},
+{q:"Tiga status penyimpanan bahan/produk di gudang adalah...",opts:["Baru, Lama, Kadaluwarsa","Diterima, Diproses, Dikirim","Dikarantina, Diluluskan, Ditolak","Aman, Waspada, Bahaya"],a:2},
+{q:"Bahan yang baru diterima dan masih menunggu hasil pemeriksaan mutu diberi status...",opts:["Diluluskan","Ditolak","Dikarantina","Distribusi"],a:2},
+{q:"Standar pencahayaan minimum untuk area gudang dan koridor lalu lintas adalah...",opts:["20 lux","50 lux","100 lux","150 lux"],a:1},
+{q:"Suhu ruangan yang dikendalikan (ber-AC) pada contoh pengaturan suhu gudang adalah maksimal...",opts:["20°C","25°C","30°C","35°C"],a:1},
+{q:"Rentang suhu untuk penyimpanan dingin (cold storage) menurut materi adalah...",opts:["0 – 2°C","2 – 8°C","8 – 15°C","15 – 20°C"],a:1},
+{q:"Tiga aspek yang diperiksa saat penerimaan barang di gudang adalah...",opts:["Dokumen, Jenis & Jumlah, Kesesuaian Fisik","Harga, Supplier, Tanggal kirim","Warna, Bau, Rasa","Berat, Volume, Kemasan"],a:0},
+{q:"Jika saat penerimaan barang ditemukan penyimpangan dan tidak ada kesepakatan penyelesaian internal, maka barang...",opts:["Tetap disimpan di area lulus","Langsung dimusnahkan","Dikembalikan kepada pemasok","Digunakan untuk produksi dengan catatan khusus"],a:2},
+{q:"Prinsip FIFO (First In, First Out) diterapkan pada pengeluaran...",opts:["Bahan baku","Bahan kemas","Produk ruahan","Sampel QC"],a:1},
+{q:"Prinsip FEFO (First Expired, First Out) diterapkan pada pengeluaran...",opts:["Bahan kemas","Bahan baku","Dokumen gudang","Alat produksi"],a:1},
+{q:"Manakah aturan pengawasan persediaan yang BENAR?",opts:["Label baru boleh menutupi label identitas asli asalkan rapi","Label & wadah boleh diubah oleh siapa saja yang bertugas di gudang","Label & wadah tidak boleh diubah, dirusak, atau diganti tanpa persetujuan QC","Bahan kedaluwarsa boleh tetap disimpan bersama stok normal"],a:2},
+{q:"Berikut yang termasuk hal yang WAJIB dilakukan personil gudang adalah...",opts:["Merokok di luar jam kerja saja","Cuci tangan sebelum masuk area kerja dan memakai APD sesuai tempat kerja","Memakai perhiasan agar terlihat rapi","Membiarkan lap kotor tetap terbuka untuk digunakan kembali"],a:1},
+{q:"Berikut yang DILARANG dilakukan di area gudang adalah...",opts:["Melapor bila ada kondisi yang memengaruhi mutu bahan/produk","Memakai pakaian kerja sesuai ketentuan","Merokok, makan, atau minum di area gudang","Mencuci tangan sebelum masuk area kerja"],a:2},
+{q:"Pengendalian hama di gudang dilaksanakan oleh vendor pihak ketiga dengan kunjungan minimal...",opts:["1 kali per hari","1 kali per minggu","1 kali per bulan","1 kali per tahun"],a:1},
+{q:"Pada alur kerja bahan baku, setelah diterima dan diperiksa kesesuaiannya, bahan diberi label identitas dan label...",opts:["DILULUSKAN","DIKARANTINA","DITOLAK","SAMPEL TELAH DIAMBIL"],a:1},
+{q:"Jumlah sampel bahan baku yang diambil untuk pengujian QC (bentuk padat/serbuk) adalah sekitar...",opts:["±5-10 g","±20-30 g","±50-60 g","±100-150 g"],a:1},
+{q:"Metode sampling yang digunakan QC saat mengambil sampel bahan kemas adalah...",opts:["ANSI/ASQ Z1.4 (Level II)","ISO 9001:2015","HACCP","Six Sigma"],a:0},
+{q:"Sampel bahan kemas paling lambat diambil QC dalam waktu...",opts:["2 hari sejak kedatangan","6 hari sejak kedatangan","10 hari sejak kedatangan","14 hari sejak kedatangan"],a:1},
+{q:"Stock opname bahan baku dilakukan oleh Tim Warehouse Raw Material dengan frekuensi...",opts:["Setiap minggu","Setiap bulan","Setiap 3 bulan","Setiap tahun"],a:1},
+{q:"Bahan baku yang diserahkan ke bagian Produksi wajib berstatus...",opts:["Dikarantina","Ditolak","Diluluskan dan status halal terverifikasi","Sedang diuji"],a:2},
+{q:"Pada penerimaan produk jadi di gudang, hal yang diperiksa Staff Warehouse Finished Good antara lain...",opts:["Nama produk, nomor batch, jumlah, tanggal kedaluwarsa, dan kejelasan logo halal","Hanya jumlah barang saja","Warna kemasan sekunder saja","Harga jual produk"],a:0},
+{q:"Setiap penyerahan produk jadi dicatat dalam dokumen berikut, KECUALI...",opts:["Catatan Distribusi Kosmetika","Kartu Stok Produk Jadi","Surat Jalan","Formulir Pengesahan Kodifikasi Bahan Kemas"],a:3}
+];
+
+const LETTERS = ["A","B","C","D"];
+const card = document.getElementById("card");
+const stripRight = document.getElementById("stripRight");
+
+let state = {
+  screen: "welcome", // welcome | quiz | result | recap
+  jenis: "Pre-Test",
+  nama: "",
+  divisi: "",
+  current: 0,
+  answers: new Array(QUESTIONS.length).fill(null)
+};
+
+function render(){
+  if(state.screen === "welcome") renderWelcome();
+  else if(state.screen === "quiz") renderQuiz();
+  else if(state.screen === "result") renderResult();
+  else if(state.screen === "recap") renderRecap();
+}
+
+function renderWelcome(){
+  stripRight.textContent = "PRE / POST TEST";
+  card.innerHTML = `
+    <h1 class="title">Pre Test &amp; Post Test Gudang</h1>
+    <div class="subtitle">Penerimaan, penyimpanan, sanitasi &amp; higiene gudang bahan baku, bahan kemas, dan produk jadi. ${QUESTIONS.length} soal pilihan ganda — pilih jenis test dan isi data diri sebelum mulai.</div>
+    <label>Jenis Test</label>
+    <div class="toggle-group" id="jenisToggle">
+      <div class="toggle-opt ${state.jenis==='Pre-Test'?'active':''}" data-jenis="Pre-Test">Pre-Test<span class="tag">Sebelum pelatihan</span></div>
+      <div class="toggle-opt ${state.jenis==='Post-Test'?'active':''}" data-jenis="Post-Test">Post-Test<span class="tag">Setelah pelatihan</span></div>
+    </div>
+    <label for="inpNama">Nama</label>
+    <input type="text" id="inpNama" placeholder="Nama lengkap" value="${escapeHtml(state.nama)}">
+    <label for="inpDivisi">Divisi / Bagian</label>
+    <input type="text" id="inpDivisi" placeholder="Contoh: Warehouse Raw Material, QC, Produksi" value="${escapeHtml(state.divisi)}">
+    <button class="btn btn-primary" id="btnStart">Mulai ${state.jenis}</button>
+    <div class="link-row">
+      <button class="btn btn-link" id="btnRecap">Lihat rekap nilai peserta lain</button>
+      <button class="btn btn-link" id="btnDlSoal">Unduh soal (Excel)</button>
+    </div>
+  `;
+  document.querySelectorAll(".toggle-opt").forEach(el => {
+    el.onclick = () => { state.jenis = el.dataset.jenis; render(); };
+  });
+  const nama = document.getElementById("inpNama");
+  const divisi = document.getElementById("inpDivisi");
+  document.getElementById("btnStart").onclick = () => {
+    state.nama = nama.value.trim();
+    state.divisi = divisi.value.trim();
+    if(!state.nama || !state.divisi){
+      alert("Mohon isi Nama dan Divisi terlebih dahulu.");
+      return;
+    }
+    state.screen = "quiz";
+    state.current = 0;
+    state.answers = new Array(QUESTIONS.length).fill(null);
+    render();
+  };
+  document.getElementById("btnRecap").onclick = () => {
+    state.screen = "recap";
+    state.cameFrom = "welcome";
+    render();
+  };
+  document.getElementById("btnDlSoal").onclick = downloadQuestionsExcel;
+}
+
+function renderQuiz(){
+  stripRight.textContent = `${state.jenis.toUpperCase()} · SOAL ${state.current+1}/${QUESTIONS.length}`;
+  const item = QUESTIONS[state.current];
+  const picked = state.answers[state.current];
+  const pct = Math.round(((state.current) / QUESTIONS.length) * 100);
+
+  card.innerHTML = `
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-num">${state.current+1}/${QUESTIONS.length}</div>
+    </div>
+    <div class="q-text">${item.q}</div>
+    <div id="opts"></div>
+    <div class="nav-row">
+      ${state.current > 0 ? '<button class="btn btn-secondary" id="btnPrev">Kembali</button>' : ''}
+      <button class="btn btn-primary" id="btnNext" ${picked===null ? 'disabled' : ''}>${state.current === QUESTIONS.length-1 ? 'Selesai' : 'Lanjut'}</button>
+    </div>
+  `;
+  const optsWrap = document.getElementById("opts");
+  item.opts.forEach((opt,i) => {
+    const div = document.createElement("div");
+    div.className = "opt" + (picked===i ? " selected" : "");
+    div.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span class="opt-text">${opt}</span>`;
+    div.onclick = () => {
+      state.answers[state.current] = i;
+      render();
+    };
+    optsWrap.appendChild(div);
+  });
+  const btnNext = document.getElementById("btnNext");
+  btnNext.onclick = () => {
+    if(state.current === QUESTIONS.length - 1){
+      finishQuiz();
+    } else {
+      state.current++;
+      render();
+    }
+  };
+  const btnPrev = document.getElementById("btnPrev");
+  if(btnPrev) btnPrev.onclick = () => { state.current--; render(); };
+}
+
+function computeScore(){
+  let correct = 0;
+  QUESTIONS.forEach((q,i) => { if(state.answers[i] === q.a) correct++; });
+  const pct = Math.round((correct / QUESTIONS.length) * 100);
+  return {correct, total: QUESTIONS.length, pct};
+}
+
+async function finishQuiz(){
+  const {correct, total, pct} = computeScore();
+  state.lastResult = {correct, total, pct};
+  state.screen = "result";
+  render();
+  // persist to shared storage, best effort
+  try{
+    const key = `hasil:${Date.now()}_${slug(state.nama)}`;
+    await window.storage.set(key, JSON.stringify({
+      jenis: state.jenis,
+      nama: state.nama,
+      divisi: state.divisi,
+      benar: correct,
+      total: total,
+      skor: pct,
+      tanggal: new Date().toISOString()
+    }), true);
+  }catch(e){
+    console.error("Gagal menyimpan hasil:", e);
+  }
+}
+
+function renderResult(){
+  stripRight.textContent = `HASIL ${state.jenis.toUpperCase()}`;
+  const {correct, total, pct} = state.lastResult;
+  const passed = pct >= KKM;
+  const reviewHtml = QUESTIONS.map((q,i) => {
+    const picked = state.answers[i];
+    const ok = picked === q.a;
+    return `
+      <div class="review-item">
+        <div class="mark ${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✕'}</div>
+        <div class="review-body">
+          <div class="review-q">${i+1}. ${q.q}</div>
+          <div class="review-ans">Jawaban Anda: ${picked===null ? '-' : LETTERS[picked]+'. '+q.opts[picked]}${ok ? '' : ' &nbsp;|&nbsp; Kunci: '+LETTERS[q.a]+'. '+q.opts[q.a]}</div>
+        </div>
+      </div>`;
+  }).join("");
+
+  card.innerHTML = `
+    <div class="result-wrap">
+      <div class="who-line"><b>${escapeHtml(state.nama)}</b> — ${escapeHtml(state.divisi)} &nbsp;·&nbsp; ${state.jenis}</div>
+      <div class="stamp ${passed ? 'pass' : 'fail'}">${passed ? 'DILULUSKAN' : 'PERLU DIULANG'}</div>
+      <div class="score-big">Skor: <b>${pct}</b> / 100 &nbsp;(${correct} dari ${total} benar)</div>
+    </div>
+    <button class="btn btn-primary" id="btnRecapAfter">Lihat Rekap Semua Peserta</button>
+    <button class="btn btn-ghost" id="btnRetry">Kembali ke Menu</button>
+    <div class="review">
+      <div class="review-title">Rincian Jawaban</div>
+      ${reviewHtml}
+    </div>
+  `;
+  document.getElementById("btnRetry").onclick = () => {
+    state.screen = "welcome";
+    render();
+  };
+  document.getElementById("btnRecapAfter").onclick = () => {
+    state.cameFrom = "result";
+    state.screen = "recap";
+    render();
+  };
+}
+
+async function renderRecap(){
+  stripRight.textContent = "REKAP NILAI";
+  if(!state.recapFilter) state.recapFilter = "Semua";
+  card.innerHTML = `
+    <h1 class="title" style="font-size:22px;">Rekap Nilai Peserta</h1>
+    <div class="subtitle">Daftar ini tersimpan bersama (shared) dan dapat dilihat oleh semua orang yang mengakses test ini.</div>
+    <div class="filter-tabs" id="filterTabs">
+      <div class="filter-tab ${state.recapFilter==='Semua'?'active':''}" data-f="Semua">Semua</div>
+      <div class="filter-tab ${state.recapFilter==='Pre-Test'?'active':''}" data-f="Pre-Test">Pre-Test</div>
+      <div class="filter-tab ${state.recapFilter==='Post-Test'?'active':''}" data-f="Post-Test">Post-Test</div>
+    </div>
+    <div class="loading" id="recapLoading">Memuat data...</div>
+    <div id="improveWrap"></div>
+    <div id="recapTableWrap"></div>
+    <button class="btn btn-export" id="btnDlHasil" style="display:none;">⬇ Unduh Rekap Nilai (Excel)</button>
+    <button class="btn btn-export" id="btnDlSoal2">⬇ Unduh Soal &amp; Kunci Jawaban (Excel)</button>
+    <button class="btn btn-ghost" id="btnBack">Kembali</button>
+  `;
+  document.getElementById("btnBack").onclick = () => {
+    state.screen = state.cameFrom === "result" ? "result" : "welcome";
+    render();
+  };
+  document.getElementById("btnDlSoal2").onclick = downloadQuestionsExcel;
+  document.querySelectorAll(".filter-tab").forEach(el => {
+    el.onclick = () => { state.recapFilter = el.dataset.f; render(); };
+  });
+
+  try{
+    const list = await window.storage.list("hasil:", true);
+    const keys = (list && list.keys) ? list.keys : [];
+    const allResults = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value){
+          const parsed = JSON.parse(r.value);
+          if(!parsed.jenis) parsed.jenis = "Post-Test"; // data lama sebelum fitur jenis test ditambahkan
+          allResults.push(parsed);
+        }
+      }catch(e){ /* skip unreadable entry */ }
+    }
+    allResults.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+    document.getElementById("recapLoading").remove();
+
+    // ringkasan peningkatan Pre-Test -> Post-Test per peserta
+    const improveWrap = document.getElementById("improveWrap");
+    const improvements = computeImprovement(allResults);
+    if(improvements.length > 0){
+      improveWrap.innerHTML = `
+        <div class="improve-box">
+          <div class="improve-title">Peningkatan Nilai (Pre-Test → Post-Test)</div>
+          ${improvements.map(it => {
+            const cls = it.delta > 0 ? 'up' : it.delta < 0 ? 'down' : 'flat';
+            const sign = it.delta > 0 ? '+' : '';
+            return `<div class="improve-row">
+              <span class="improve-name">${escapeHtml(it.nama)} <span style="color:var(--ink-soft); font-weight:400;">(${escapeHtml(it.divisi)})</span></span>
+              <span>${it.pre} → ${it.post} &nbsp;<span class="delta ${cls}">${sign}${it.delta}</span></span>
+            </div>`;
+          }).join("")}
+        </div>`;
+    } else {
+      improveWrap.innerHTML = "";
+    }
+
+    const results = state.recapFilter === "Semua" ? allResults : allResults.filter(r => r.jenis === state.recapFilter);
+    const wrap = document.getElementById("recapTableWrap");
+    if(results.length === 0){
+      wrap.innerHTML = `<div class="empty-recap">Belum ada peserta pada kategori ini.</div>`;
+      document.getElementById("btnDlHasil").style.display = allResults.length ? "flex" : "none";
+      if(allResults.length) document.getElementById("btnDlHasil").onclick = () => downloadResultsExcel(allResults);
+      return;
+    }
+    const btnDlHasil = document.getElementById("btnDlHasil");
+    btnDlHasil.style.display = "flex";
+    btnDlHasil.onclick = () => downloadResultsExcel(allResults);
+    const rows = results.map(r => {
+      const passed = r.skor >= KKM;
+      const tgl = new Date(r.tanggal);
+      const tglStr = isNaN(tgl) ? '-' : tgl.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+      return `<tr>
+        <td>${escapeHtml(r.nama||'-')}</td>
+        <td>${escapeHtml(r.divisi||'-')}</td>
+        <td>${r.jenis||'-'}</td>
+        <td>${r.benar}/${r.total}</td>
+        <td><span class="badge ${passed?'pass':'fail'}">${r.skor} — ${passed?'LULUS':'ULANG'}</span></td>
+        <td>${tglStr}</td>
+      </tr>`;
+    }).join("");
+    wrap.innerHTML = `
+      <table class="recap-table">
+        <thead><tr><th>Nama</th><th>Divisi</th><th>Jenis</th><th>Benar</th><th>Skor</th><th>Tanggal</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }catch(e){
+    console.error(e);
+    document.getElementById("recapLoading").textContent = "Gagal memuat rekap nilai. Coba lagi.";
+  }
+}
+
+function computeImprovement(results){
+  const groups = {};
+  results.forEach(r => {
+    const key = (r.nama||'').trim().toLowerCase() + "|" + (r.divisi||'').trim().toLowerCase();
+    if(!key.trim()) return;
+    if(!groups[key]) groups[key] = { nama: r.nama, divisi: r.divisi, pre: null, post: null };
+    if(r.jenis === "Pre-Test"){
+      if(groups[key].pre === null || new Date(r.tanggal) > new Date(groups[key].preDate||0)){
+        groups[key].pre = r.skor; groups[key].preDate = r.tanggal;
+      }
+    } else if(r.jenis === "Post-Test"){
+      if(groups[key].post === null || new Date(r.tanggal) > new Date(groups[key].postDate||0)){
+        groups[key].post = r.skor; groups[key].postDate = r.tanggal;
+      }
+    }
+  });
+  return Object.values(groups)
+    .filter(g => g.pre !== null && g.post !== null)
+    .map(g => ({ nama: g.nama, divisi: g.divisi, pre: g.pre, post: g.post, delta: g.post - g.pre }));
+}
+
+function downloadQuestionsExcel(){
+  const rows = QUESTIONS.map((q,i) => ({
+    "No.": i+1,
+    "Soal": q.q,
+    "A": q.opts[0],
+    "B": q.opts[1],
+    "C": q.opts[2],
+    "D": q.opts[3],
+    "Kunci Jawaban": LETTERS[q.a]
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:5},{wch:55},{wch:28},{wch:28},{wch:28},{wch:28},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Soal Post Test");
+  XLSX.writeFile(wb, "Soal_PostTest_Gudang.xlsx");
+}
+
+function downloadResultsExcel(results){
+  const rows = results.map(r => {
+    const tgl = new Date(r.tanggal);
+    return {
+      "Nama": r.nama || "-",
+      "Divisi": r.divisi || "-",
+      "Jenis Test": r.jenis || "-",
+      "Benar": r.benar,
+      "Total Soal": r.total,
+      "Skor": r.skor,
+      "Status": r.skor >= KKM ? "LULUS" : "PERLU DIULANG",
+      "Tanggal": isNaN(tgl) ? "-" : tgl.toLocaleString('id-ID')
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:24},{wch:22},{wch:12},{wch:9},{wch:11},{wch:8},{wch:15},{wch:20}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
+  XLSX.writeFile(wb, "Rekap_Nilai_PreTest_PostTest_Gudang.xlsx");
+}
+
+function slug(s){
+  return (s||"anon").toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40) || 'anon';
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+render();
+</script>
+</body>
+</html>
